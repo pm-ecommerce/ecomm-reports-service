@@ -51,7 +51,7 @@ public class ReportService implements IReportService {
         }
     }
 
-    public ReportResponseDTO generateOrderReport(ReportRequestDTO reportRequestDTO){
+    public ReportResponseDTO generateReport(ReportRequestDTO reportRequestDTO){
 
         //check input params
         HashMap<String, String> requestParams = reportRequestDTO.getRequestParams();
@@ -69,7 +69,7 @@ public class ReportService implements IReportService {
         return reportResponseDTO;
     }
 
-    public ReportResponseDTO generateOrderReportGroupBy(ReportRequestDTO reportRequestDTO){
+    public ReportResponseDTO generateOrderReport(ReportRequestDTO reportRequestDTO){
 
         //check input params
         HashMap<String, String> requestParams = reportRequestDTO.getRequestParams();

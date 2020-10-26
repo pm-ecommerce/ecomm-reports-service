@@ -24,14 +24,14 @@ public class ReportController {
     @Autowired
     ReportService orderReportService;
 
-    @GetMapping("/data/order")
-    public ResponseEntity<ApiResponse<ReportResponseDTO>> generateDataSaleReport(HttpServletRequest httpServletRequest) throws IOException, JRException, SQLException {
+    @GetMapping("/data")
+    public ResponseEntity<ApiResponse<ReportResponseDTO>> generateDataReport(HttpServletRequest httpServletRequest) throws IOException, JRException, SQLException {
         ApiResponse<ReportResponseDTO> response = new ApiResponse<>();
         try{
             //setup parameters
             ReportRequestDTO reportRequestDTO = Converter.convert(httpServletRequest);
             //generate sale report
-            ReportResponseDTO reportResponseDTO = orderReportService.generateOrderReport((reportRequestDTO));
+            ReportResponseDTO reportResponseDTO = orderReportService.generateReport((reportRequestDTO));
 
             response.setData(reportResponseDTO);
             response.setMessage("Successfully");
@@ -45,14 +45,14 @@ public class ReportController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/data/sale")
-    public ResponseEntity<ApiResponse<ReportResponseDTO>> generateDataSaleReportGroup(HttpServletRequest httpServletRequest) throws IOException, JRException, SQLException {
+    @GetMapping("/data/order")
+    public ResponseEntity<ApiResponse<ReportResponseDTO>> generateDataOrderReport(HttpServletRequest httpServletRequest) throws IOException, JRException, SQLException {
         ApiResponse<ReportResponseDTO> response = new ApiResponse<>();
         try{
             //setup parameters
             ReportRequestDTO reportRequestDTO = Converter.convert(httpServletRequest);
             //generate sale report
-            ReportResponseDTO reportResponseDTO = orderReportService.generateOrderReportGroupBy(reportRequestDTO);
+            ReportResponseDTO reportResponseDTO = orderReportService.generateOrderReport(reportRequestDTO);
 
             response.setData(reportResponseDTO);
             response.setMessage("Successfully");
