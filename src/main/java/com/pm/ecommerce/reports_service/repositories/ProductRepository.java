@@ -1,6 +1,5 @@
 package com.pm.ecommerce.reports_service.repositories;
 
-import com.pm.ecommerce.entities.Order;
 import com.pm.ecommerce.entities.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

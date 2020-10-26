@@ -6,7 +6,9 @@ import lombok.Data;
 public class ProductGroupByYearDTO extends ProductGroupDTO {
     private int year;
     public ProductGroupByYearDTO(Object[] objects){
-        this.year=Integer.parseInt(objects[0].toString());
-        this.count=Integer.parseInt(objects[1].toString());
+        if(objects.length>1) {
+            this.year = Integer.parseInt(objects[0].toString());
+            this.count = Integer.parseInt(objects[1].toString());
+        }
     }
 }

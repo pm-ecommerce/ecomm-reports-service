@@ -7,6 +7,8 @@ public class ProductGroupDTO<T> {
     protected int count;
     public ProductGroupDTO(){}
     public ProductGroupDTO(Object[] objects){
-        this.count=Integer.parseInt(objects[1].toString());
+        if(objects.length>0) {
+            this.count = Integer.parseInt(objects[0].toString());
+        }
     }
 }
