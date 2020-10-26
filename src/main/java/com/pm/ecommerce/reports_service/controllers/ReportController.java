@@ -6,6 +6,12 @@ import com.pm.ecommerce.reports_service.utils.Converter;
 import com.pm.ecommerce.reports_service.utils.dto.ReportRequestDTO;
 import com.pm.ecommerce.reports_service.utils.dto.ReportResponseDTO;
 import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,15 +20,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.SQLException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/report")
 public class ReportController {
 
     @Autowired
-    ReportService orderReportService;
+    ReportService reportService;
 
     @GetMapping("/data")
     public ResponseEntity<ApiResponse<ReportResponseDTO>> generateDataReport(HttpServletRequest httpServletRequest) throws IOException, JRException, SQLException {
@@ -31,7 +40,7 @@ public class ReportController {
             //setup parameters
             ReportRequestDTO reportRequestDTO = Converter.convert(httpServletRequest);
             //generate sale report
-            ReportResponseDTO reportResponseDTO = orderReportService.generateReport((reportRequestDTO));
+            ReportResponseDTO reportResponseDTO = reportService.generateReport((reportRequestDTO));
 
             response.setData(reportResponseDTO);
             response.setMessage("Successfully");
@@ -52,7 +61,7 @@ public class ReportController {
             //setup parameters
             ReportRequestDTO reportRequestDTO = Converter.convert(httpServletRequest);
             //generate sale report
-            ReportResponseDTO reportResponseDTO = orderReportService.generateOrderReport(reportRequestDTO);
+            ReportResponseDTO reportResponseDTO = reportService.generateOrderReport(reportRequestDTO);
 
             response.setData(reportResponseDTO);
             response.setMessage("Successfully");
@@ -73,7 +82,7 @@ public class ReportController {
             //setup parameters
             ReportRequestDTO reportRequestDTO = Converter.convert(httpServletRequest);
             //generate sale report
-            ReportResponseDTO reportResponseDTO = orderReportService.generateProductReport(reportRequestDTO);
+            ReportResponseDTO reportResponseDTO = reportService.generateProductReport(reportRequestDTO);
 
             response.setData(reportResponseDTO);
             response.setMessage("Successfully");
@@ -94,7 +103,7 @@ public class ReportController {
             //setup parameters
             ReportRequestDTO reportRequestDTO = Converter.convert(httpServletRequest);
             //generate sale report
-            ReportResponseDTO reportResponseDTO = orderReportService.generateVendorReport(reportRequestDTO);
+            ReportResponseDTO reportResponseDTO = reportService.generateVendorReport(reportRequestDTO);
 
             response.setData(reportResponseDTO);
             response.setMessage("Successfully");
@@ -106,5 +115,23 @@ public class ReportController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/pdf")
+    public String generateReport(HttpServletResponse response) throws IOException, JRException, SQLException {
+        response.setContentType("application/pdf");
+        OutputStream out = response.getOutputStream();
+        // Generating report using List<JasperPrint>
+        List<JasperPrint> jasperPrintList = reportService.generateJasperPrints();
+        JRPdfExporter exporter = new JRPdfExporter();
+        exporter.setExporterInput(SimpleExporterInput.getInstance(jasperPrintList));
+        exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(out));
+        SimplePdfExporterConfiguration configuration = new SimplePdfExporterConfiguration();
+        configuration.setCreatingBatchModeBookmarks(true);
+        exporter.setConfiguration(configuration);
+        exporter.exportReport();
+        out.flush();
+        out.close();
+        return "success";
     }
 }

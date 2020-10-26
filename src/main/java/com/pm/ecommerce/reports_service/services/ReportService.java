@@ -5,16 +5,22 @@ import com.pm.ecommerce.reports_service.repositories.OrderRepository;
 import com.pm.ecommerce.reports_service.repositories.ProductRepository;
 import com.pm.ecommerce.reports_service.repositories.VendorRepository;
 import com.pm.ecommerce.reports_service.utils.dto.*;
+import com.pm.ecommerce.reports_service.utils.dto.pdf.*;
 import com.pm.ecommerce.reports_service.utils.enums.ReportRequestEnum;
 import com.pm.ecommerce.reports_service.utils.enums.ReportResponseEnum;
 import com.pm.ecommerce.reports_service.utils.Converter;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 
+import java.io.InputStream;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class ReportService implements IReportService {
@@ -27,6 +33,9 @@ public class ReportService implements IReportService {
 
     @Autowired
     private VendorRepository vendorRepository;
+
+    @Autowired
+    ResourceLoader resourceLoader;
 
     String vendorId=null;
     Timestamp fromDate=null, toDate=null;
@@ -190,6 +199,144 @@ public class ReportService implements IReportService {
 
         return reportResponseDTO;
     }
+
+    public List<JasperPrint> generateJasperPrints(){
+        List<JasperPrint> jasperPrintList = new ArrayList<JasperPrint>();
+        jasperPrintList.add(this.generateOrderCoverJasperPrint());
+        jasperPrintList.add(this.generateOrderYearJasperPrint());
+        jasperPrintList.add(this.generateOrderYearMonthJasperPrint());
+        jasperPrintList.add(this.generateTop10OrderVendorJasperPrint());
+        jasperPrintList.add(this.generateTop10OrderProductJasperPrint());
+        jasperPrintList.add(this.generateOrderBillingStateJasperPrint());
+        jasperPrintList.add(this.generateOrderShippingStateJasperPrint());
+        return jasperPrintList;
+    }
+
+    private JasperPrint generateOrderCoverJasperPrint() {
+        try {
+            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_cover.jrxml").getURI().getPath());
+            JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(null,false);
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("Today", new Date());
+            parameters.put("Title", "Sale Report");
+            parameters.put("SubTitle", "A quick report of a PM eCommerce");
+            InputStream imgInputStream = resourceLoader.getResource("classpath:static/wave.png").getInputStream();
+            parameters.put("Logo",imgInputStream);
+            return JasperFillManager.fillReport(jasperReport, parameters, jrBeanCollectionDataSource);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return  null;
+        }
+    }
+
+    private JasperPrint generateOrderYearJasperPrint() {
+        try {
+            List<Object[]> list = orderRepository.findOrderYear();
+            List<OrderYearDTO> dtoList = new ArrayList<>();
+            for(Object[] objects: list){
+                dtoList.add(new OrderYearDTO(objects));
+            }
+            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_year.jrxml").getURI().getPath());
+            JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(dtoList,false);
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("caption", list.size() + " years / " + orderRepository.count() +" orders");
+            return JasperFillManager.fillReport(jasperReport, parameters, jrBeanCollectionDataSource);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return  null;
+        }
+    }
+
+    private JasperPrint generateOrderYearMonthJasperPrint() {
+        try {
+            List<Object[]> list = orderRepository.findOrderYearMonth();
+            List<OrderYearMonthDTO> dtoList = new ArrayList<>();
+            for(Object[] objects: list){
+                dtoList.add(new OrderYearMonthDTO(objects));
+            }
+            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_month.jrxml").getURI().getPath());
+            JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(dtoList,false);
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("caption", list.size() + " months / " + orderRepository.count() +" orders");
+            return JasperFillManager.fillReport(jasperReport, parameters, jrBeanCollectionDataSource);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return  null;
+        }
+    }
+
+    private JasperPrint generateTop10OrderVendorJasperPrint() {
+        try {
+            List<Object[]> list = orderRepository.findOrderVendor();
+            List<OrderVendorDTO> dtoList = new ArrayList<>();
+            for(Object[] objects: list){
+                dtoList.add(new OrderVendorDTO(objects));
+            }
+            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_vendor.jrxml").getURI().getPath());
+            JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(dtoList,false);
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("caption", list.size() + " vendors / " + orderRepository.count() +" orders");
+            return JasperFillManager.fillReport(jasperReport, parameters, jrBeanCollectionDataSource);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return  null;
+        }
+    }
+
+    private JasperPrint generateTop10OrderProductJasperPrint() {
+        try {
+            List<Object[]> list = orderRepository.findOrderProduct();
+            List<OrderProductDTO> dtoList = new ArrayList<>();
+            for(Object[] objects: list){
+                dtoList.add(new OrderProductDTO(objects));
+            }
+            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_product.jrxml").getURI().getPath());
+            JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(dtoList,false);
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("caption", list.size() + " products / " + orderRepository.count() +" orders");
+            return JasperFillManager.fillReport(jasperReport, parameters, jrBeanCollectionDataSource);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return  null;
+        }
+    }
+
+    private JasperPrint generateOrderBillingStateJasperPrint() {
+        try {
+            List<Object[]> list = orderRepository.findOrderBillingState();
+            List<OrderStateDTO> dtoList = new ArrayList<>();
+            for(Object[] objects: list){
+                dtoList.add(new OrderStateDTO(objects));
+            }
+            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_billing_state.jrxml").getURI().getPath());
+            JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(dtoList,false);
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("caption", list.size() + " states / " + orderRepository.count() +" orders");
+            return JasperFillManager.fillReport(jasperReport, parameters, jrBeanCollectionDataSource);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return  null;
+        }
+    }
+
+    private JasperPrint generateOrderShippingStateJasperPrint() {
+        try {
+            List<Object[]> list = orderRepository.findOrderShippingState();
+            List<OrderStateDTO> dtoList = new ArrayList<>();
+            for(Object[] objects: list){
+                dtoList.add(new OrderStateDTO(objects));
+            }
+            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_shipping_state.jrxml").getURI().getPath());
+            JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(dtoList,false);
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("caption", list.size() + " states / " + orderRepository.count() +" orders");
+            return JasperFillManager.fillReport(jasperReport, parameters, jrBeanCollectionDataSource);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return  null;
+        }
+    }
+
     public ReportResponseDTO generateJasperReport(ReportRequestDTO reportRequestDTO){
         return null;
     }

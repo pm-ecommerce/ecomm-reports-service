@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.15.0.final using JasperReports Library version 6.15.0-dd49bfb94918336b8321d5507193f0169ead4e95  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Blank_A4_2" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="99b1e0a9-949f-4be2-ad34-3e971ce35601">
+    <property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+    <property name="com.jaspersoft.studio.data.defaultdataadapter" value="testDB"/>
+    <parameter name="caption" class="java.lang.String"/>
+    <queryString language="SQL">
+        <![CDATA[select count(*) as total,a.state
+from orders o, addresses a
+where o.billing_address_id=a.id
+group by a.state]]>
+    </queryString>
+    <field name="total" class="java.lang.Integer">
+        <property name="com.jaspersoft.studio.field.name" value="total"/>
+        <property name="com.jaspersoft.studio.field.label" value="total"/>
+    </field>
+    <field name="state" class="java.lang.String">
+        <property name="com.jaspersoft.studio.field.name" value="state"/>
+        <property name="com.jaspersoft.studio.field.label" value="state"/>
+        <property name="com.jaspersoft.studio.field.tree.path" value="addresses"/>
+        <fieldDescription><![CDATA[]]></fieldDescription>
+    </field>
+    <group name="state">
+        <groupExpression><![CDATA[$F{state}]]></groupExpression>
+    </group>
+    <background>
+        <band splitType="Stretch"/>
+    </background>
+    <title>
+        <band height="79" splitType="Stretch"/>
+    </title>
+    <pageHeader>
+        <band height="79" splitType="Stretch">
+            <staticText>
+                <reportElement mode="Opaque" x="0" y="30" width="550" height="29" uuid="90435186-8b28-4a24-b610-a5d5bcd5184d"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="16" isBold="true"/>
+                </textElement>
+                <text><![CDATA[ORDER BILLING ADDRESS BY STATE]]></text>
+            </staticText>
+        </band>
+    </pageHeader>
+    <columnHeader>
+        <band height="61" splitType="Stretch"/>
+    </columnHeader>
+    <summary>
+        <band height="322" splitType="Stretch">
+            <pie3DChart>
+                <chart evaluationTime="Report">
+                    <reportElement x="67" y="60" width="420" height="262" uuid="1fed0d7f-4d78-49fa-868c-9fda1287a315"/>
+                    <chartTitle/>
+                    <chartSubtitle/>
+                    <chartLegend/>
+                </chart>
+                <pieDataset>
+                    <dataset resetType="Report"/>
+                    <keyExpression><![CDATA[$F{state}]]></keyExpression>
+                    <valueExpression><![CDATA[$F{total}]]></valueExpression>
+                    <labelExpression><![CDATA[$F{state}.toString()+" ("+$F{total}+")"]]></labelExpression>
+                </pieDataset>
+                <pie3DPlot>
+                    <plot/>
+                    <itemLabel/>
+                </pie3DPlot>
+            </pie3DChart>
+            <textField>
+                <reportElement x="250" y="20" width="60" height="30" uuid="16315090-2f40-4d9d-88d8-581817c2b793"/>
+                <textFieldExpression><![CDATA[$P{caption}]]></textFieldExpression>
+            </textField>
+        </band>
+    </summary>
+</jasperReport>
