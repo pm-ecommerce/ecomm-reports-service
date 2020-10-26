@@ -1,9 +1,7 @@
 package com.pm.ecommerce.reports_service.utils;
 
 import com.pm.ecommerce.entities.*;
-import com.pm.ecommerce.reports_service.utils.dto.OrderDTO;
-import com.pm.ecommerce.reports_service.utils.dto.OrderItemDTO;
-import com.pm.ecommerce.reports_service.utils.dto.ReportRequestDTO;
+import com.pm.ecommerce.reports_service.utils.dto.*;
 import com.pm.ecommerce.reports_service.utils.enums.ReportRequestEnum;
 
 import javax.servlet.http.HttpServletRequest;

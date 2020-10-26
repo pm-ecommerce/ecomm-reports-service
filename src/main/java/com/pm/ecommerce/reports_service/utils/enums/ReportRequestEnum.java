@@ -7,7 +7,11 @@ public enum ReportRequestEnum {
     MAX_PRICE("maxPrice"),
     MIN_COST("minCost"),
     MAX_COST("maxCost"),
-    VENDOR_ID("vendorId");
+    VENDOR_ID("vendorId"),
+    GROUP_BY("groupBy"),
+    YEAR("year"),
+    MONTH("month"),
+    DAY("day");
     String value;
 
     public String value() {

@@ -7,5 +7,7 @@ import com.pm.ecommerce.reports_service.utils.dto.ReportResponseDTO;
 import java.util.List;
 
 public interface IReportService {
-    public ReportResponseDTO generateReport(ReportRequestDTO reportRequestDTO);
+    public ReportResponseDTO generateOrderReport(ReportRequestDTO reportRequestDTO);
+    public ReportResponseDTO generateVendorReport(ReportRequestDTO reportRequestDTO);
+    public ReportResponseDTO generateProductReport(ReportRequestDTO reportRequestDTO);
 }
