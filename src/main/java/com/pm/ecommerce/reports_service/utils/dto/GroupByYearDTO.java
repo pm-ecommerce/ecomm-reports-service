@@ -3,12 +3,13 @@ package com.pm.ecommerce.reports_service.utils.dto;
 import lombok.Data;
 
 @Data
-public class ProductGroupByYearDTO extends ProductGroupDTO {
+public class GroupByYearDTO extends GroupDTO {
     private int year;
-    public ProductGroupByYearDTO(Object[] objects){
-        if(objects.length>1) {
+    public GroupByYearDTO(Object[] objects){
+        if(objects.length>2) {
             this.year = Integer.parseInt(objects[0].toString());
             this.count = Integer.parseInt(objects[1].toString());
+            this.sum = Double.parseDouble(objects[2].toString());
         }
     }
 }

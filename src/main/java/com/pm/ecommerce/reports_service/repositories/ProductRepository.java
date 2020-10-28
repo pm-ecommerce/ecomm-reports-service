@@ -16,7 +16,7 @@ public interface ProductRepository extends JpaRepository<Product,Integer> {
             "     and (:fromDate is null or o.created_date>:fromDate) " +
             "     and (:toDate is null or o.created_date<:toDate) " +
             "     and (:vendorId is null or v.id=:vendorId) " +
-            " group by o.id " +
+            " group by p.id " +
             " having 1=1 " +
             " and (:minCost is null or sum(i.quantity*p.price)>:minCost) " +
             " and (:maxCost is null or sum(i.quantity*p.price)<:maxCost) "
@@ -27,13 +27,13 @@ public interface ProductRepository extends JpaRepository<Product,Integer> {
                                                 @Param("minCost") String minCost,
                                                 @Param("maxCost") String maxCost);
 
-    @Query(value="SELECT count(distinct p.id) " +
+    @Query(value="SELECT count(distinct o.id), sum(i.quantity*p.price) " +
             "     FROM orders o, orders_items oi, order_items i, products p, vendors v " +
             "     WHERE o.id=oi.order_id and oi.items_id=i.id and i.product_id=p.id and p.vendor_id=v.id " +
             "           and (:fromDate is null or o.created_date>:fromDate) " +
             "           and (:toDate is null or o.created_date<:toDate) " +
             "           and (:vendorId is null or v.id=:vendorId) " +
-            "     GROUP BY oi.order_id " +
+            "     GROUP BY p.id " +
             "     HAVING 1=1 " +
             "           and (:minCost is null or sum(i.quantity*p.price)>:minCost) " +
             "           and (:maxCost is null or sum(i.quantity*p.price)<:maxCost) "
@@ -44,7 +44,7 @@ public interface ProductRepository extends JpaRepository<Product,Integer> {
                                                                   @Param("minCost") String minCost,
                                                                   @Param("maxCost") String maxCost);
 
-    @Query(value="SELECT EXTRACT(YEAR FROM o.created_date), count(distinct p.id) " +
+    @Query(value="SELECT EXTRACT(YEAR FROM o.created_date), count(distinct p.id), sum(i.quantity*p.price) " +
             "     FROM orders  o, orders_items oi, order_items i, products p, vendors v  " +
             "     WHERE o.id=oi.order_id and oi.items_id=i.id and i.product_id=p.id and p.vendor_id=v.id " +
             "           and (:fromDate is null or o.created_date>:fromDate) " +
@@ -61,7 +61,7 @@ public interface ProductRepository extends JpaRepository<Product,Integer> {
                                                                    @Param("minCost") String minCost,
                                                                    @Param("maxCost") String maxCost);
 
-    @Query(value="SELECT EXTRACT(YEAR_MONTH FROM o.created_date), count(distinct p.id) " +
+    @Query(value="SELECT EXTRACT(YEAR_MONTH FROM o.created_date), count(distinct p.id), sum(i.quantity*p.price) " +
             "    FROM orders  o, orders_items oi, order_items i, products p, vendors v " +
             "    WHERE o.id=oi.order_id and oi.items_id=i.id and i.product_id=p.id and p.vendor_id=v.id " +
             "           and (:fromDate is null or o.created_date>:fromDate) " +
@@ -78,7 +78,24 @@ public interface ProductRepository extends JpaRepository<Product,Integer> {
                                                                         @Param("minCost") String minCost,
                                                                         @Param("maxCost") String maxCost);
 
-    @Query(value="SELECT EXTRACT(DAY FROM o.created_date), count(distinct p.id) " +
+    @Query(value="SELECT DATE_FORMAT(o.created_date, '%Y %b %e') as week , count(distinct p.id), sum(i.quantity*p.price) " +
+            "    FROM orders  o, orders_items oi, order_items i, products p, vendors v " +
+            "    WHERE o.id=oi.order_id and oi.items_id=i.id and i.product_id=p.id and p.vendor_id=v.id " +
+            "           and (:fromDate is null or o.created_date>:fromDate) " +
+            "           and (:toDate is null or o.created_date<:toDate) " +
+            "           and (:vendorId is null or v.id=:vendorId) " +
+            "    GROUP BY week " +
+            "    HAVING 1=1 " +
+            "           and (:minCost is null or sum(i.quantity*p.price)>:minCost) " +
+            "           and (:maxCost is null or sum(i.quantity*p.price)<:maxCost) "
+            ,nativeQuery=true)
+    public List<Object[]> findProductByReportRequestWithGroupByWeek(@Param("fromDate") Timestamp fromDate,
+                                                                   @Param("toDate") Timestamp toDate,
+                                                                   @Param("vendorId") String vendorId,
+                                                                   @Param("minCost") String minCost,
+                                                                   @Param("maxCost") String maxCost);
+
+    @Query(value="SELECT EXTRACT(DAY FROM o.created_date), count(distinct p.id), sum(i.quantity*p.price) " +
             "    FROM orders  o, orders_items oi, order_items i, products p, vendors v " +
             "    WHERE o.id=oi.order_id and oi.items_id=i.id and i.product_id=p.id and p.vendor_id=v.id " +
             "           and (:fromDate is null or o.created_date>:fromDate) " +

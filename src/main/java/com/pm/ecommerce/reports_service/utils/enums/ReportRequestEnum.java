@@ -11,6 +11,7 @@ public enum ReportRequestEnum {
     GROUP_BY("groupBy"),
     YEAR("year"),
     MONTH("month"),
+    WEEK("week"),
     DAY("day");
     String value;
 
