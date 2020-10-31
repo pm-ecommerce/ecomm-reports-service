@@ -61,13 +61,13 @@ public interface ProductRepository extends JpaRepository<Product,Integer> {
                                                                    @Param("minCost") String minCost,
                                                                    @Param("maxCost") String maxCost);
 
-    @Query(value="SELECT EXTRACT(YEAR_MONTH FROM o.created_date), count(distinct p.id), sum(i.quantity*p.price) " +
+    @Query(value="SELECT DATE_FORMAT(o.created_date, '%Y %b') as month, count(distinct p.id), sum(i.quantity*p.price) " +
             "    FROM orders  o, orders_items oi, order_items i, products p, vendors v " +
             "    WHERE o.id=oi.order_id and oi.items_id=i.id and i.product_id=p.id and p.vendor_id=v.id " +
             "           and (:fromDate is null or o.created_date>:fromDate) " +
             "           and (:toDate is null or o.created_date<:toDate) " +
             "           and (:vendorId is null or v.id=:vendorId) " +
-            "    GROUP BY EXTRACT(YEAR_MONTH FROM o.created_date)" +
+            "    GROUP BY month " +
             "    HAVING 1=1 " +
             "           and (:minCost is null or sum(i.quantity*p.price)>:minCost) " +
             "           and (:maxCost is null or sum(i.quantity*p.price)<:maxCost) "

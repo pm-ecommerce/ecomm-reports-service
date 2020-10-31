@@ -61,13 +61,13 @@ public interface OrderRepository extends JpaRepository<Order,Integer> {
                                                                    @Param("minCost") String minCost,
                                                                    @Param("maxCost") String maxCost);
 
-    @Query(value="SELECT EXTRACT(YEAR_MONTH FROM o.created_date), count(o.id), sum(i.quantity*p.price) " +
+    @Query(value="SELECT DATE_FORMAT(o.created_date, '%Y %b') as month, count(o.id), sum(i.quantity*p.price) " +
             "    FROM orders  o, orders_items oi, order_items i, products p, vendors v " +
             "    WHERE o.id=oi.order_id and oi.items_id=i.id and i.product_id=p.id and p.vendor_id=v.id " +
             "           and (:fromDate is null or o.created_date>:fromDate) " +
             "           and (:toDate is null or o.created_date<:toDate) " +
             "           and (:vendorId is null or v.id=:vendorId) " +
-            "    GROUP BY EXTRACT(YEAR_MONTH FROM o.created_date)" +
+            "    GROUP BY month " +
             "    HAVING 1=1 " +
             "           and (:minCost is null or sum(i.quantity*p.price)>:minCost) " +
             "           and (:maxCost is null or sum(i.quantity*p.price)<:maxCost) "
@@ -121,8 +121,16 @@ public interface OrderRepository extends JpaRepository<Order,Integer> {
     @Query(value="SELECT count(o.id), EXTRACT(YEAR FROM o.created_date) as year FROM orders o GROUP BY year",nativeQuery=true)
     public List<Object[]> findOrderYear();
 
-    @Query(value="SELECT count(o.id), EXTRACT(YEAR_MONTH FROM o.created_date) as month FROM orders o GROUP BY month",nativeQuery=true)
+    @Query(value="SELECT count(o.id), DATE_FORMAT(o.created_date, '%Y %b') as month FROM orders o GROUP BY month",nativeQuery=true)
     public List<Object[]> findOrderYearMonth();
+
+    @Query(value="SELECT count(distinct o.id), c.name " +
+            "     FROM orders  o, orders_items oi, order_items i, products p, vendors v, categories c " +
+            "     WHERE o.id=oi.order_id and oi.items_id=i.id and i.product_id=p.id and p.vendor_id=v.id and p.category_id=c.id " +
+            "     GROUP BY c.id" +
+            "     ORDER BY count(distinct o.id) DESC " +
+            "     LIMIT 10",nativeQuery=true)
+    public List<Object[]> findOrderCategory();
 
     @Query(value="SELECT count(distinct o.id), v.business_name " +
             "     FROM orders  o, orders_items oi, order_items i, products p, vendors v " +
@@ -148,6 +156,15 @@ public interface OrderRepository extends JpaRepository<Order,Integer> {
             "     GROUP BY v.id "
             ,nativeQuery=true)
     public Integer findOrderTotalByVendor(Integer vendorId);
+
+    @Query(value="SELECT count(distinct o.id), c.name " +
+            "     FROM orders  o, orders_items oi, order_items i, products p, vendors v, categories c " +
+            "     WHERE o.id=oi.order_id and oi.items_id=i.id and i.product_id=p.id and p.category_id=c.id and p.vendor_id=v.id and v.id= :vendorId " +
+            "     GROUP BY c.id " +
+            "     ORDER BY count(distinct o.id) DESC " +
+            "     LIMIT 10 "
+            ,nativeQuery=true)
+    public List<Object[]> findOrderByCategory(Integer vendorId);
 
     @Query(value="SELECT count(distinct o.id), p.name " +
             "     FROM orders  o, orders_items oi, order_items i, products p, vendors v " +

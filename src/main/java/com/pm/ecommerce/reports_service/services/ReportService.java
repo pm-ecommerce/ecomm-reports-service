@@ -107,7 +107,7 @@ public class ReportService implements IReportService {
         }else  if(groupBy!=null && groupBy.equals(ReportRequestEnum.WEEK.value())) {
             list = orderRepository.findOrdersByReportRequestWithGroupByWeek(fromDate,toDate,vendorId,minCost,maxCost);
             for(Object[] objects:list){
-                dtoList.add( new GroupByMonthDTO(objects));
+                dtoList.add( new GroupByWeekDTO(objects));
             }
         }else if(groupBy!=null && groupBy.equals(ReportRequestEnum.DAY.value())) {
             list = orderRepository.findOrdersByReportRequestWithGroupByDay(fromDate,toDate,vendorId,minCost,maxCost);
@@ -150,7 +150,7 @@ public class ReportService implements IReportService {
         }else if(groupBy!=null && groupBy.equals(ReportRequestEnum.WEEK.value())) {
             list = vendorRepository.findVendorByReportRequestWithGroupByWeek(fromDate,toDate,vendorId,minCost,maxCost);
             for(Object[] objects:list){
-                dtoList.add( new GroupByDayDTO(objects));
+                dtoList.add( new GroupByWeekDTO(objects));
             }
         }else if(groupBy!=null && groupBy.equals(ReportRequestEnum.DAY.value())) {
             list = vendorRepository.findVendorByReportRequestWithGroupByDay(fromDate,toDate,vendorId,minCost,maxCost);
@@ -195,7 +195,7 @@ public class ReportService implements IReportService {
         }else if(groupBy!=null && groupBy.equals(ReportRequestEnum.WEEK.value())) {
             list = productRepository.findProductByReportRequestWithGroupByWeek(fromDate, toDate, vendorId, minCost, maxCost);
             for (Object[] objects : list) {
-                dtoList.add(new GroupByDayDTO(objects));
+                dtoList.add(new GroupByWeekDTO(objects));
             }
         }else {
             list = productRepository.findProductByReportRequestWithoutGroupBy(fromDate,toDate,vendorId,minCost,maxCost);
@@ -230,7 +230,7 @@ public class ReportService implements IReportService {
         } else  if(groupBy!=null && groupBy.equals(ReportRequestEnum.WEEK.value())) {
             list = categoryRepository.findCategoryByReportRequestWithGroupByWeek(fromDate, toDate, vendorId, minCost, maxCost);
             for (Object[] objects : list) {
-                dtoList.add(new GroupByMonthDTO(objects));
+                dtoList.add(new GroupByWeekDTO(objects));
             }
         } else if(groupBy!=null && groupBy.equals(ReportRequestEnum.DAY.value())) {
             list = categoryRepository.findCategoryByReportRequestWithGroupByDay(fromDate,toDate,vendorId,minCost,maxCost);
@@ -257,6 +257,7 @@ public class ReportService implements IReportService {
         jasperPrintList.add(this.generateOrderCoverJasperPrint());
         jasperPrintList.add(this.generateOrderYearJasperPrint(null));
         jasperPrintList.add(this.generateOrderYearMonthJasperPrint(null));
+        jasperPrintList.add(this.generateTop10OrderCategoryJasperPrint(null));
         jasperPrintList.add(this.generateTop10OrderVendorJasperPrint());
         jasperPrintList.add(this.generateTop10OrderProductJasperPrint(null));
         jasperPrintList.add(this.generateOrderBillingStateJasperPrint(null));
@@ -270,6 +271,7 @@ public class ReportService implements IReportService {
         jasperPrintList.add(this.generateOrderCoverJasperPrint());
         jasperPrintList.add(this.generateOrderYearJasperPrint(vendorId));
         jasperPrintList.add(this.generateOrderYearMonthJasperPrint(vendorId));
+        jasperPrintList.add(this.generateTop10OrderCategoryJasperPrint(vendorId));
         jasperPrintList.add(this.generateTop10OrderProductJasperPrint(vendorId));
         jasperPrintList.add(this.generateOrderBillingStateJasperPrint(vendorId));
         jasperPrintList.add(this.generateOrderShippingStateJasperPrint(vendorId));
@@ -340,6 +342,24 @@ public class ReportService implements IReportService {
             JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(dtoList,false);
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("caption", list.size() + " vendors / " + orderRepository.count() +" orders");
+            return JasperFillManager.fillReport(jasperReport, parameters, jrBeanCollectionDataSource);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return  null;
+        }
+    }
+
+    private JasperPrint generateTop10OrderCategoryJasperPrint(Integer vendorId) {
+        try {
+            List<Object[]> list = (vendorId==null)?orderRepository.findOrderCategory():orderRepository.findOrderByCategory(vendorId);
+            List<OrderCategoryDTO> dtoList = new ArrayList<>();
+            for(Object[] objects: list){
+                dtoList.add(new OrderCategoryDTO(objects));
+            }
+            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_category.jrxml").getURI().getPath());
+            JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(dtoList,false);
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("caption", list.size() + " categories / " + ((vendorId==null)?orderRepository.count():orderRepository.findOrderTotalByVendor(vendorId)) +" orders");
             return JasperFillManager.fillReport(jasperReport, parameters, jrBeanCollectionDataSource);
         } catch (Exception e) {
             e.printStackTrace();
