@@ -10,7 +10,7 @@ public class OrderItemDTO {
     private String product_name;
     private int category_id;
     private String category_name;
-    private int vendor_id;
+    private Integer vendor_id;
     private String vendor_name;
     private int quantity;
     private double price;

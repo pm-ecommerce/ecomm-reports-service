@@ -59,6 +59,7 @@ public class Converter {
             orderDTO.setBilling_address_id(order.getBillingAddress());
             orderDTO.setShipping_address_id(order.getShippingAddress());
             orderDTO.setTax(order.getTax());
+            orderDTO.setStatus(order.getStatus());
             orderDTO.setOrder_date(order.getCreatedDate().toLocalDateTime());
             List<OrderItem> orderItemList = order.getItems();
             List<OrderItemDTO> orderItemDTOList = new ArrayList<>();
@@ -85,13 +86,21 @@ public class Converter {
                 orderItemDTO.setPrice(product.getPrice());
                 Category category = product.getCategory();
                 if (category != null) {
-                    orderItemDTO.setCategory_id(category.getId());
-                    orderItemDTO.setCategory_name(category.getName());
+                    try {
+                        orderItemDTO.setCategory_id(category.getId());
+                        orderItemDTO.setCategory_name(category.getName());
+                    }catch (Exception e){
+                        // assume could not find the category id
+                    }
                 }
                 Vendor vendor = product.getVendor();
                 if (vendor != null) {
-                    orderItemDTO.setVendor_id(vendor.getId());
-                    orderItemDTO.setVendor_name(vendor.getName());
+                    try {
+                        orderItemDTO.setVendor_id(vendor.getId());
+                        orderItemDTO.setVendor_name(vendor.getName());
+                    }catch (Exception e){
+                        // assume could not find the vendor id
+                    }
                 }
             }
         }
