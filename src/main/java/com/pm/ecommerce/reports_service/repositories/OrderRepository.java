@@ -13,6 +13,14 @@ public interface OrderRepository extends JpaRepository<Order,Integer> {
     @Query(value="select o.* " +
             " from orders o, orders_items oi, order_items i, products p, vendors v " +
             " where o.id=oi.order_id and oi.items_id=i.id and i.product_id=p.id and p.vendor_id=v.id " +
+                    "     and (:vendorId is null or v.id=:vendorId) " +
+            " group by o.id "
+            , nativeQuery=true)
+    public List<Order> findOrdersByVendor(@Param("vendorId") String vendorId);
+
+    @Query(value="select o.* " +
+            " from orders o, orders_items oi, order_items i, products p, vendors v " +
+            " where o.id=oi.order_id and oi.items_id=i.id and i.product_id=p.id and p.vendor_id=v.id " +
             "     and (:fromDate is null or o.created_date>:fromDate) " +
             "     and (:toDate is null or o.created_date<:toDate) " +
             "     and (:vendorId is null or v.id=:vendorId) " +

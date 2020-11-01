@@ -1,10 +1,9 @@
 package com.pm.ecommerce.reports_service.services;
 
 import com.pm.ecommerce.entities.Order;
-import com.pm.ecommerce.reports_service.repositories.CategoryRepository;
-import com.pm.ecommerce.reports_service.repositories.OrderRepository;
-import com.pm.ecommerce.reports_service.repositories.ProductRepository;
-import com.pm.ecommerce.reports_service.repositories.VendorRepository;
+import com.pm.ecommerce.entities.OrderItem;
+import com.pm.ecommerce.entities.Vendor;
+import com.pm.ecommerce.reports_service.repositories.*;
 import com.pm.ecommerce.reports_service.utils.dto.*;
 import com.pm.ecommerce.reports_service.utils.dto.pdf.*;
 import com.pm.ecommerce.reports_service.utils.enums.ReportRequestEnum;
@@ -37,6 +36,18 @@ public class ReportService implements IReportService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private ScheduledDeliveryRepository scheduledDeliveryRepository;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     @Autowired
     ResourceLoader resourceLoader;
@@ -78,10 +89,45 @@ public class ReportService implements IReportService {
         List<Order> orderList = orderRepository.findOrderByReportRequest(fromDate,toDate,vendorId,minCost,maxCost);
         List<OrderDTO> orderDTOList = Converter.convert(orderList);
 
+        SummaryDTO summaryDTO = new SummaryDTO();
+        orderList = orderRepository.findOrdersByVendor(vendorId);
+        summaryDTO.setOrderTotal(Long.valueOf(orderList.size()));
+        double amount =0.0;
+        for(Order o:orderList) {
+            if (o != null) {
+                for (OrderItem i : o.getItems()) {
+                    if (i != null) {
+                        amount += i.getQuantity() * i.getRate();
+                    }
+                }
+            }
+        }
+        summaryDTO.setCostTotal(amount);
+        summaryDTO.setEmployeeTotal(employeeRepository.count());
+        summaryDTO.setCategoryTotal(categoryRepository.count());
+        summaryDTO.setUserTotal(userRepository.count());
+        summaryDTO.setTransactionTotal(transactionRepository.count());
+        summaryDTO.setVendorTotal(vendorRepository.count());
+        summaryDTO.setProductTotal(productRepository.count());
+
+        if(vendorId!=null){
+            Vendor vendor = new Vendor();
+            try{
+                Integer id = Integer.parseInt(vendorId);
+                vendor.setId(id);
+                summaryDTO.setDeliveryTotal(Long.valueOf(scheduledDeliveryRepository.findAllByVendor(vendor).size()));
+                summaryDTO.setProductTotal(Long.valueOf(productRepository.findAllByVendor(vendor).size()));
+                summaryDTO.setCategoryTotal(Long.valueOf(categoryRepository.countCategoriesByVendorId(vendorId)));
+            }catch (NumberFormatException e){
+                // do nothing
+            }
+            summaryDTO.setUserTotal(userRepository.countUserByVendorId(vendorId));
+        }
+
         //output params
         ReportResponseDTO reportResponseDTO = new ReportResponseDTO();
         HashMap<String, Object> responseParams = reportResponseDTO.getResponseData();
-        responseParams.put(ReportResponseEnum.TOTAL.value(),orderDTOList.size());
+        responseParams.put(ReportResponseEnum.TOTAL.value(),summaryDTO);
         responseParams.put(ReportResponseEnum.LIST.value(),orderDTOList);
 
         return reportResponseDTO;

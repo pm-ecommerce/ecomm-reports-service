@@ -11,6 +11,11 @@ import java.util.List;
 
 public interface CategoryRepository extends JpaRepository<Category,Integer> {
 
+    @Query(value = " select count(distinct c.id) " +
+            "from categories c, products p, vendors v " +
+            "where c.id = p.category_id and p.vendor_id=v.id and (:vendorId is null or v.id=:vendorId) ", nativeQuery = true)
+    public Long countCategoriesByVendorId(@Param("vendorId") String vendorId);
+
     @Query(value="select c.* " +
             " from orders o, orders_items oi, order_items i, products p, vendors v, categories c " +
             " where o.id=oi.order_id and oi.items_id=i.id and i.product_id=p.id and p.vendor_id=v.id and p.category_id=c.id " +

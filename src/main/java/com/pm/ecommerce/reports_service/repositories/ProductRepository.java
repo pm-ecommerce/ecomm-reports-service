@@ -1,6 +1,7 @@
 package com.pm.ecommerce.reports_service.repositories;
 
 import com.pm.ecommerce.entities.Product;
+import com.pm.ecommerce.entities.Vendor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -9,6 +10,8 @@ import java.sql.Timestamp;
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product,Integer> {
+
+    List<Product> findAllByVendor(Vendor vendor);
 
     @Query(value="select p.* " +
             " from orders o, orders_items oi, order_items i, products p, vendors v " +
