@@ -15,9 +15,11 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.InputStream;
 import java.sql.Timestamp;
 import java.util.*;
@@ -326,7 +328,9 @@ public class ReportService implements IReportService {
 
     private JasperPrint generateOrderCoverJasperPrint() {
         try {
-            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_cover.jrxml").getURI().getPath());
+            System.out.println(".... generateOrderCoverJasperPrint ....");
+            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_cover.jrxml").getInputStream());
+            System.out.println("...reading file OK");
             JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(null,false);
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("Today", new Date());
@@ -336,6 +340,7 @@ public class ReportService implements IReportService {
             parameters.put("Logo",imgInputStream);
             return JasperFillManager.fillReport(jasperReport, parameters, jrBeanCollectionDataSource);
         } catch (Exception e) {
+            System.err.println(e.getMessage());
             e.printStackTrace();
             return  null;
         }
@@ -348,7 +353,7 @@ public class ReportService implements IReportService {
             for(Object[] objects: list){
                 dtoList.add(new OrderYearDTO(objects));
             }
-            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_year.jrxml").getURI().getPath());
+            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_year.jrxml").getInputStream());
             JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(dtoList,false);
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("caption", list.size() + " years / " + ((vendorId==null)?orderRepository.count():orderRepository.findOrderTotalByVendor(vendorId)) +" orders");
@@ -366,7 +371,7 @@ public class ReportService implements IReportService {
             for(Object[] objects: list){
                 dtoList.add(new OrderMonthDTO(objects));
             }
-            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_month.jrxml").getURI().getPath());
+            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_month.jrxml").getInputStream());
             JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(dtoList,false);
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("caption", list.size() + " months / " + ((vendorId==null)?orderRepository.count():orderRepository.findOrderTotalByVendor(vendorId)) +" orders");
@@ -384,7 +389,7 @@ public class ReportService implements IReportService {
             for(Object[] objects: list){
                 dtoList.add(new OrderVendorDTO(objects));
             }
-            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_vendor.jrxml").getURI().getPath());
+            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_vendor.jrxml").getInputStream());
             JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(dtoList,false);
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("caption", list.size() + " vendors / " + orderRepository.count() +" orders");
@@ -402,7 +407,7 @@ public class ReportService implements IReportService {
             for(Object[] objects: list){
                 dtoList.add(new OrderCategoryDTO(objects));
             }
-            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_category.jrxml").getURI().getPath());
+            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_category.jrxml").getInputStream());
             JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(dtoList,false);
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("caption", list.size() + " categories / " + ((vendorId==null)?orderRepository.count():orderRepository.findOrderTotalByVendor(vendorId)) +" orders");
@@ -420,7 +425,7 @@ public class ReportService implements IReportService {
             for(Object[] objects: list){
                 dtoList.add(new OrderProductDTO(objects));
             }
-            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_product.jrxml").getURI().getPath());
+            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_product.jrxml").getInputStream());
             JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(dtoList,false);
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("caption", list.size() + " products / " + ((vendorId==null)?orderRepository.count():orderRepository.findOrderTotalByVendor(vendorId)) +" orders");
@@ -438,7 +443,7 @@ public class ReportService implements IReportService {
             for(Object[] objects: list){
                 dtoList.add(new OrderStateDTO(objects));
             }
-            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_billing_state.jrxml").getURI().getPath());
+            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_billing_state.jrxml").getInputStream());
             JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(dtoList,false);
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("caption", list.size() + " states / " + ((vendorId==null)?orderRepository.count():orderRepository.findOrderTotalByVendor(vendorId)) +" orders");
@@ -456,7 +461,7 @@ public class ReportService implements IReportService {
             for(Object[] objects: list){
                 dtoList.add(new OrderStateDTO(objects));
             }
-            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_shipping_state.jrxml").getURI().getPath());
+            JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_shipping_state.jrxml").getInputStream());
             JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(dtoList,false);
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("caption", list.size() + " states / " + ((vendorId==null)?orderRepository.count():orderRepository.findOrderTotalByVendor(vendorId)) +" orders");
