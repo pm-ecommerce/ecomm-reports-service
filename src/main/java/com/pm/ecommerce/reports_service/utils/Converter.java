@@ -1,7 +1,10 @@
 package com.pm.ecommerce.reports_service.utils;
 
 import com.pm.ecommerce.entities.*;
-import com.pm.ecommerce.reports_service.utils.dto.*;
+import com.pm.ecommerce.reports_service.utils.dto.OrderDTO;
+import com.pm.ecommerce.reports_service.utils.dto.OrderItemDTO;
+import com.pm.ecommerce.reports_service.utils.dto.ReportRequestDTO;
+import com.pm.ecommerce.reports_service.utils.dto.ScheduledDeliveryDTO;
 import com.pm.ecommerce.reports_service.utils.enums.ReportRequestEnum;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,19 +18,19 @@ import java.util.List;
 
 public class Converter {
 
-    public static ReportRequestDTO convert(HttpServletRequest httpServletRequest){
+    public static ReportRequestDTO convert(HttpServletRequest httpServletRequest) {
         ReportRequestDTO reportRequestDTO = new ReportRequestDTO();
-        for(ReportRequestEnum e: ReportRequestEnum.values()){
+        for (ReportRequestEnum e : ReportRequestEnum.values()) {
             reportRequestDTO.getRequestParams().put(e.value(), httpServletRequest.getParameter(e.value()));
         }
-        return  reportRequestDTO;
+        return reportRequestDTO;
     }
 
-    public static Timestamp convert(String dateString){
+    public static Timestamp convert(String dateString) {
         Timestamp ts = null;
-        if(dateString!=null) {
-            String[] patterns = {"MM/dd/yyyy","MM-dd-yyyy","yyyy/MM/dd","yyyy-MM-dd"};
-            for (String p:patterns) {
+        if (dateString != null) {
+            String[] patterns = {"MM/dd/yyyy", "MM-dd-yyyy", "yyyy/MM/dd", "yyyy-MM-dd"};
+            for (String p : patterns) {
                 DateFormat df = new SimpleDateFormat(p);
                 Date pd = null;
                 try {
@@ -43,17 +46,45 @@ public class Converter {
         return ts;
     }
 
-    public static List<OrderDTO> convert(List<Order> orderList){
+    public static List<OrderDTO> convert(List<Order> orderList) {
         List<OrderDTO> orderDTOList = new ArrayList<>();
-        for ( Order order: orderList) {
+        for (Order order : orderList) {
             orderDTOList.add(Converter.convert(order));
         }
         return orderDTOList;
     }
 
-    public static OrderDTO convert(Order order){
+    public static List<ScheduledDeliveryDTO> convert2(List<ScheduledDelivery> orderList) {
+        List<ScheduledDeliveryDTO> orderDTOList = new ArrayList<>();
+        for (ScheduledDelivery order : orderList) {
+            orderDTOList.add(Converter.convert2(order));
+        }
+        return orderDTOList;
+    }
+
+    public static ScheduledDeliveryDTO convert2(ScheduledDelivery order) {
+        ScheduledDeliveryDTO orderDTO = new ScheduledDeliveryDTO();
+        if (order != null) {
+            orderDTO.setOrder_id(order.getId());
+            orderDTO.setUser_id(order.getUser().getId());
+            orderDTO.setShipping_address(order.getAddress());
+            orderDTO.setStatus(order.getStatus());
+            orderDTO.setDelivery_date(order.getDeliveryDate().toLocalDateTime());
+            List<OrderItem> orderItemList = order.getItems();
+            List<OrderItemDTO> orderItemDTOList = new ArrayList<>();
+            for (OrderItem orderItem : orderItemList) {
+                OrderItemDTO orderItemDTO = Converter.convert(orderItem);
+                orderItemDTO.setOrder_id(order.getId());
+                orderItemDTOList.add(orderItemDTO);
+            }
+            orderDTO.setOrder_item_list(orderItemDTOList);
+        }
+        return orderDTO;
+    }
+
+    public static OrderDTO convert(Order order) {
         OrderDTO orderDTO = new OrderDTO();
-        if(order!=null) {
+        if (order != null) {
             orderDTO.setOrder_id(order.getId());
             orderDTO.setUser_id(order.getUser().getId());
             orderDTO.setBilling_address_id(order.getBillingAddress());
@@ -73,9 +104,9 @@ public class Converter {
         return orderDTO;
     }
 
-    public static OrderItemDTO convert(OrderItem orderItem){
+    public static OrderItemDTO convert(OrderItem orderItem) {
         OrderItemDTO orderItemDTO = new OrderItemDTO();
-        if(orderItem!=null) {
+        if (orderItem != null) {
             orderItemDTO.setOrder_item_id(orderItem.getId());
             orderItemDTO.setQuantity(orderItem.getQuantity());
             orderItemDTO.setPrice(orderItem.getRate());
@@ -89,7 +120,7 @@ public class Converter {
                     try {
                         orderItemDTO.setCategory_id(category.getId());
                         orderItemDTO.setCategory_name(category.getName());
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         // assume could not find the category id
                     }
                 }
@@ -98,7 +129,7 @@ public class Converter {
                     try {
                         orderItemDTO.setVendor_id(vendor.getId());
                         orderItemDTO.setVendor_name(vendor.getName());
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         // assume could not find the vendor id
                     }
                 }

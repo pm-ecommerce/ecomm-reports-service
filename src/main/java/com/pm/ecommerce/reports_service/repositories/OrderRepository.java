@@ -1,6 +1,7 @@
 package com.pm.ecommerce.reports_service.repositories;
 
 import com.pm.ecommerce.entities.Order;
+import com.pm.ecommerce.entities.ScheduledDelivery;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -8,119 +9,78 @@ import org.springframework.data.repository.query.Param;
 import java.sql.Timestamp;
 import java.util.List;
 
-public interface OrderRepository extends JpaRepository<Order,Integer> {
+public interface OrderRepository extends JpaRepository<ScheduledDelivery,Integer> {
 
     @Query(value="select o.* " +
-            " from orders o, orders_items oi, order_items i, products p, vendors v " +
-            " where o.id=oi.order_id and oi.items_id=i.id and i.product_id=p.id and p.vendor_id=v.id " +
-                    "     and (:vendorId is null or v.id=:vendorId) " +
+            " from scheduled_deliveries o, scheduled_deliveries_items oi, order_items i,  vendors v " +
+            " where o.id=oi.scheduled_delivery_id and oi.items_id=i.id and o.vendor_id=v.id " +
+                    "     and (:vendorId is null or v.id=:vendorId) and o.status <= 3" +
             " group by o.id "
             , nativeQuery=true)
-    public List<Order> findOrdersByVendor(@Param("vendorId") String vendorId);
+    public List<ScheduledDelivery> findOrdersByVendor(@Param("vendorId") String vendorId);
 
     @Query(value="select o.* " +
-            " from orders o, orders_items oi, order_items i, products p, vendors v " +
-            " where o.id=oi.order_id and oi.items_id=i.id and i.product_id=p.id and p.vendor_id=v.id " +
-            "     and (:fromDate is null or o.created_date>:fromDate) " +
-            "     and (:toDate is null or o.created_date<:toDate) " +
-            "     and (:vendorId is null or v.id=:vendorId) " +
-            " group by o.id " +
-            " having 1=1 " +
-            " and (:minCost is null or sum(i.quantity*p.price)>:minCost) " +
-            " and (:maxCost is null or sum(i.quantity*p.price)<:maxCost) "
-    , nativeQuery=true)
-    public List<Order> findOrderByReportRequest(@Param("fromDate") Timestamp fromDate,
+            " from scheduled_deliveries o, scheduled_deliveries_items oi, order_items i, vendors v " +
+            " where o.id=oi.scheduled_delivery_id and oi.items_id=i.id and o.vendor_id=v.id " +
+            "     and (o.delivery_date>=:fromDate) " +
+            "     and (o.delivery_date<=:toDate) " +
+            "     and o.status <= 3" +
+            " group by o.id "
+            , nativeQuery=true)
+    public List<ScheduledDelivery> findOrderByReportRequest(@Param("fromDate") Timestamp fromDate,
+                                                @Param("toDate") Timestamp toDate);
+    @Query(value="select o.* " +
+            " from scheduled_deliveries o, scheduled_deliveries_items oi, order_items i, vendors v " +
+            " where o.id=oi.scheduled_delivery_id and oi.items_id=i.id and o.vendor_id=v.id " +
+            "     and (:fromDate is null or o.delivery_date>:fromDate) " +
+            "     and (:toDate is null or o.delivery_date<:toDate) " +
+            "     and (:vendorId is null or v.id=:vendorId) and o.status <= 3" +
+            " group by o.id "
+            , nativeQuery=true)
+    public List<ScheduledDelivery> findOrderByReportRequest(@Param("fromDate") Timestamp fromDate,
                                                 @Param("toDate") Timestamp toDate,
-                                                @Param("vendorId") String vendorId,
-                                                @Param("minCost") String minCost,
-                                                @Param("maxCost") String maxCost);
+                                                @Param("vendorId") String vendorId);
 
-    @Query(value="SELECT count(oi.order_id), sum(i.quantity*p.price) " +
-            "     FROM orders o, orders_items oi, order_items i, products p, vendors v " +
-            "     WHERE o.id=oi.order_id and oi.items_id=i.id and i.product_id=p.id and p.vendor_id=v.id " +
-            "           and (:fromDate is null or o.created_date>:fromDate) " +
-            "           and (:toDate is null or o.created_date<:toDate) " +
-            "           and (:vendorId is null or v.id=:vendorId) " +
-            "     GROUP BY oi.order_id " +
-            "     HAVING 1=1 " +
-            "           and (:minCost is null or sum(i.quantity*p.price)>:minCost) " +
-            "           and (:maxCost is null or sum(i.quantity*p.price)<:maxCost) "
+    @Query(value="SELECT count(oi.order_id), sum(i.quantity*i.rate) " +
+            "     FROM scheduled_deliveries o, scheduled_deliveries_items oi, order_items i, vendors v " +
+            "     WHERE o.id=oi.scheduled_delivery_id and oi.items_id=i.id and o.vendor_id=v.id " +
+            "           and (:vendorId is null or v.id=:vendorId) and o.status <= 3" +
+            "     GROUP BY oi.scheduled_delivery_id "
             ,nativeQuery=true)
-    public List<Object[]> findOrdersByReportRequestWithoutGroupBy(@Param("fromDate") Timestamp fromDate,
-                                                                  @Param("toDate") Timestamp toDate,
-                                                                  @Param("vendorId") String vendorId,
-                                                                  @Param("minCost") String minCost,
-                                                                  @Param("maxCost") String maxCost);
+    public List<Object[]> findOrdersByReportRequestWithoutGroupBy(@Param("vendorId") String vendorId);
 
-    @Query(value="SELECT EXTRACT(YEAR FROM o.created_date), count(o.id), sum(i.quantity*p.price) " +
-            "     FROM orders  o, orders_items oi, order_items i, products p, vendors v  " +
-            "     WHERE o.id=oi.order_id and oi.items_id=i.id and i.product_id=p.id and p.vendor_id=v.id " +
-            "           and (:fromDate is null or o.created_date>:fromDate) " +
-            "           and (:toDate is null or o.created_date<:toDate) " +
-            "           and (:vendorId is null or v.id=:vendorId) " +
-            "     GROUP BY EXTRACT(YEAR FROM o.created_date)" +
-            "     HAVING 1=1 " +
-            "           and (:minCost is null or sum(i.quantity*p.price)>:minCost) " +
-            "           and (:maxCost is null or sum(i.quantity*p.price)<:maxCost) "
+    @Query(value="SELECT EXTRACT(YEAR FROM o.delivery_date), count(o.id), sum(i.quantity*i.rate) " +
+            "     FROM scheduled_deliveries  o, scheduled_deliveries_items oi, order_items i, vendors v  " +
+            "     WHERE o.id=oi.scheduled_delivery_id and oi.items_id=i.id and o.vendor_id=v.id " +
+            "           and (:vendorId is null or v.id=:vendorId) and o.status <= 3 " +
+            "     GROUP BY EXTRACT(YEAR FROM o.delivery_date)"
             ,nativeQuery=true)
-    public List<Object[]> findOrdersByReportRequestWithGroupByYear(@Param("fromDate") Timestamp fromDate,
-                                                                   @Param("toDate") Timestamp toDate,
-                                                                   @Param("vendorId") String vendorId,
-                                                                   @Param("minCost") String minCost,
-                                                                   @Param("maxCost") String maxCost);
+    public List<Object[]> findOrdersByReportRequestWithGroupByYear(@Param("vendorId") String vendorId);
 
-    @Query(value="SELECT DATE_FORMAT(o.created_date, '%Y %b') as month, count(o.id), sum(i.quantity*p.price) " +
-            "    FROM orders  o, orders_items oi, order_items i, products p, vendors v " +
-            "    WHERE o.id=oi.order_id and oi.items_id=i.id and i.product_id=p.id and p.vendor_id=v.id " +
-            "           and (:fromDate is null or o.created_date>:fromDate) " +
-            "           and (:toDate is null or o.created_date<:toDate) " +
-            "           and (:vendorId is null or v.id=:vendorId) " +
-            "    GROUP BY month " +
-            "    HAVING 1=1 " +
-            "           and (:minCost is null or sum(i.quantity*p.price)>:minCost) " +
-            "           and (:maxCost is null or sum(i.quantity*p.price)<:maxCost) "
+    @Query(value="SELECT DATE_FORMAT(o.delivery_date, '%Y %b') as month, count(o.id), sum(i.quantity*i.rate) " +
+            "    FROM scheduled_deliveries  o, scheduled_deliveries_items oi, order_items i, vendors v " +
+            "    WHERE o.id=oi.scheduled_delivery_id and oi.items_id=i.id and o.vendor_id=v.id " +
+            "           and (:vendorId is null or v.id=:vendorId) and o.status <= 3 " +
+            "    GROUP BY month "
             ,nativeQuery=true)
-    public List<Object[]> findOrdersByReportRequestWithGroupByYearMonth(@Param("fromDate") Timestamp fromDate,
-                                                                        @Param("toDate") Timestamp toDate,
-                                                                        @Param("vendorId") String vendorId,
-                                                                        @Param("minCost") String minCost,
-                                                                        @Param("maxCost") String maxCost);
+    public List<Object[]> findOrdersByReportRequestWithGroupByYearMonth(@Param("vendorId") String vendorId);
 
-    @Query(value="SELECT DATE_FORMAT(o.created_date, '%Y %b %e') as week, count(o.id), sum(i.quantity*p.price) " +
-            "    FROM orders  o, orders_items oi, order_items i, products p, vendors v " +
-            "    WHERE o.id=oi.order_id and oi.items_id=i.id and i.product_id=p.id and p.vendor_id=v.id " +
-            "           and (:fromDate is null or o.created_date>:fromDate) " +
-            "           and (:toDate is null or o.created_date<:toDate) " +
-            "           and (:vendorId is null or v.id=:vendorId) " +
-            "    GROUP BY week " +
-            "    HAVING 1=1 " +
-            "           and (:minCost is null or sum(i.quantity*p.price)>:minCost) " +
-            "           and (:maxCost is null or sum(i.quantity*p.price)<:maxCost) "
+    @Query(value="SELECT DATE_FORMAT(o.delivery_date, '%Y %b %e') as week, count(o.id), sum(i.quantity*i.rate) " +
+            "    FROM scheduled_deliveries  o, scheduled_deliveries_items oi, order_items i, vendors v " +
+            "    WHERE o.id=oi.scheduled_delivery_id and oi.items_id=i.id and o.vendor_id=v.id " +
+            "           and (:vendorId is null or v.id=:vendorId) and o.status <= 3 " +
+            "    GROUP BY week "
             ,nativeQuery=true)
-    public List<Object[]> findOrdersByReportRequestWithGroupByWeek(@Param("fromDate") Timestamp fromDate,
-                                                                  @Param("toDate") Timestamp toDate,
-                                                                  @Param("vendorId") String vendorId,
-                                                                  @Param("minCost") String minCost,
-                                                                  @Param("maxCost") String maxCost);
+    public List<Object[]> findOrdersByReportRequestWithGroupByWeek(@Param("vendorId") String vendorId);
 
-    @Query(value="SELECT EXTRACT(DAY FROM o.created_date), count(o.id), sum(i.quantity*p.price) " +
-            "    FROM orders  o, orders_items oi, order_items i, products p, vendors v " +
-            "    WHERE o.id=oi.order_id and oi.items_id=i.id and i.product_id=p.id and p.vendor_id=v.id " +
-            "           and (:fromDate is null or o.created_date>:fromDate) " +
-            "           and (:toDate is null or o.created_date<:toDate) " +
-            "           and (:vendorId is null or v.id=:vendorId) " +
-            "    GROUP BY EXTRACT(DAY FROM o.created_date)" +
-            "    HAVING 1=1 " +
-            "           and (:minCost is null or sum(i.quantity*p.price)>:minCost) " +
-            "           and (:maxCost is null or sum(i.quantity*p.price)<:maxCost) "
-            ,nativeQuery=true)
-    public List<Object[]> findOrdersByReportRequestWithGroupByDay(@Param("fromDate") Timestamp fromDate,
-                                                                  @Param("toDate") Timestamp toDate,
-                                                                  @Param("vendorId") String vendorId,
-                                                                  @Param("minCost") String minCost,
-                                                                  @Param("maxCost") String maxCost);
+    @Query(value="SELECT EXTRACT(DAY FROM o.delivery_date), count(o.id), sum(i.quantity*i.rate) " +
+            "    FROM scheduled_deliveries  o, scheduled_deliveries_items oi, order_items i, vendors v " +
+            "    WHERE o.id=oi.scheduled_delivery_id and oi.items_id=i.id and o.vendor_id=v.id " +
+            "           and (:vendorId is null or v.id=:vendorId) and o.status <= 3 " +
+            "    GROUP BY EXTRACT(DAY FROM o.delivery_date)",nativeQuery=true)
+    public List<Object[]> findOrdersByReportRequestWithGroupByDay(@Param("vendorId") String vendorId);
 
-    @Query(value="SELECT count(*),a.state FROM orders o, addresses a WHERE o.billing_address_id=a.id GROUP BY a.state",nativeQuery=true)
+    @Query(value="SELECT count(*),a.state FROM orders o, addresses a WHERE o.shipping_address_id=a.id GROUP BY a.state",nativeQuery=true)
     public List<Object[]> findOrderBillingState();
 
     @Query(value="SELECT count(*),a.state FROM orders o, addresses a WHERE o.shipping_address_id=a.id GROUP BY a.state",nativeQuery=true)
@@ -196,7 +156,7 @@ public interface OrderRepository extends JpaRepository<Order,Integer> {
 
     @Query(value="SELECT count(distinct o.id),a.state " +
             "     FROM orders o, addresses a, orders_items oi, order_items i, products p, vendors v " +
-            "     WHERE o.billing_address_id=a.id and o.id=oi.order_id and oi.items_id=i.id and i.product_id=p.id and p.vendor_id=v.id and v.id=:vendorId " +
+            "     WHERE o.shipping_address_id=a.id and o.id=oi.order_id and oi.items_id=i.id and i.product_id=p.id and p.vendor_id=v.id and v.id=:vendorId " +
             "     GROUP BY a.state ",nativeQuery=true)
     public List<Object[]> findOrderBillingStateByVendor(Integer vendorId);
 

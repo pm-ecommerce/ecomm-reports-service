@@ -33,7 +33,7 @@ public class ReportController {
     @GetMapping("/data")
     public ResponseEntity<ApiResponse<ReportResponseDTO>> generateDataReport(HttpServletRequest httpServletRequest) {
         ApiResponse<ReportResponseDTO> response = new ApiResponse<>();
-        try{
+        try {
             //setup parameters
             ReportRequestDTO reportRequestDTO = Converter.convert(httpServletRequest);
             //generate sale report
@@ -42,7 +42,7 @@ public class ReportController {
             response.setData(reportResponseDTO);
             response.setMessage("Successfully");
             //response.setStatus();
-        }catch (Exception e){
+        } catch (Exception e) {
             response.setStatus(500);
             response.setMessage(e.getMessage());
             e.printStackTrace();
@@ -52,9 +52,9 @@ public class ReportController {
     }
 
     @GetMapping("/data/order")
-    public ResponseEntity<ApiResponse<ReportResponseDTO>> generateDataOrderReport(HttpServletRequest httpServletRequest)  {
+    public ResponseEntity<ApiResponse<ReportResponseDTO>> generateDataOrderReport(HttpServletRequest httpServletRequest) {
         ApiResponse<ReportResponseDTO> response = new ApiResponse<>();
-        try{
+        try {
             //setup parameters
             ReportRequestDTO reportRequestDTO = Converter.convert(httpServletRequest);
             //generate sale report
@@ -63,7 +63,7 @@ public class ReportController {
             response.setData(reportResponseDTO);
             response.setMessage("Successfully");
             //response.setStatus();
-        }catch (Exception e){
+        } catch (Exception e) {
             response.setStatus(500);
             response.setMessage(e.getMessage());
             e.printStackTrace();
@@ -73,9 +73,9 @@ public class ReportController {
     }
 
     @GetMapping("/data/product")
-    public ResponseEntity<ApiResponse<ReportResponseDTO>> generateDataProductReport(HttpServletRequest httpServletRequest)  {
+    public ResponseEntity<ApiResponse<ReportResponseDTO>> generateDataProductReport(HttpServletRequest httpServletRequest) {
         ApiResponse<ReportResponseDTO> response = new ApiResponse<>();
-        try{
+        try {
             //setup parameters
             ReportRequestDTO reportRequestDTO = Converter.convert(httpServletRequest);
             //generate sale report
@@ -84,7 +84,7 @@ public class ReportController {
             response.setData(reportResponseDTO);
             response.setMessage("Successfully");
             //response.setStatus();
-        }catch (Exception e){
+        } catch (Exception e) {
             response.setStatus(500);
             response.setMessage(e.getMessage());
             e.printStackTrace();
@@ -96,7 +96,7 @@ public class ReportController {
     @GetMapping("/data/vendor")
     public ResponseEntity<ApiResponse<ReportResponseDTO>> generateDataVendorReport(HttpServletRequest httpServletRequest) {
         ApiResponse<ReportResponseDTO> response = new ApiResponse<>();
-        try{
+        try {
             //setup parameters
             ReportRequestDTO reportRequestDTO = Converter.convert(httpServletRequest);
             //generate sale report
@@ -105,7 +105,7 @@ public class ReportController {
             response.setData(reportResponseDTO);
             response.setMessage("Successfully");
             //response.setStatus();
-        }catch (Exception e){
+        } catch (Exception e) {
             response.setStatus(500);
             response.setMessage(e.getMessage());
             e.printStackTrace();
@@ -117,7 +117,7 @@ public class ReportController {
     @GetMapping("/data/category")
     public ResponseEntity<ApiResponse<ReportResponseDTO>> generateDataCategoryReport(HttpServletRequest httpServletRequest) {
         ApiResponse<ReportResponseDTO> response = new ApiResponse<>();
-        try{
+        try {
             //setup parameters
             ReportRequestDTO reportRequestDTO = Converter.convert(httpServletRequest);
             //generate sale report
@@ -126,7 +126,7 @@ public class ReportController {
             response.setData(reportResponseDTO);
             response.setMessage("Successfully");
             //response.setStatus();
-        }catch (Exception e){
+        } catch (Exception e) {
             response.setStatus(500);
             response.setMessage(e.getMessage());
             e.printStackTrace();
@@ -136,7 +136,7 @@ public class ReportController {
     }
 
     @GetMapping("/pdf/full-report")
-    public String generatePdfReportForAdmin(HttpServletResponse response) throws IOException, JRException{
+    public String generatePdfReportForAdmin(HttpServletResponse response) throws IOException, JRException {
         response.setContentType("application/pdf");
         OutputStream out = response.getOutputStream();
         // Generating report using List<JasperPrint>
@@ -154,7 +154,7 @@ public class ReportController {
     }
 
     @GetMapping("/pdf/full-report/{vendorId}")
-    public String generatePdfReportForVendor(@PathVariable(name="vendorId", required = true) Integer vendorId, HttpServletResponse response) throws IOException, JRException{
+    public String generatePdfReportForVendor(@PathVariable(name = "vendorId", required = true) Integer vendorId, HttpServletResponse response) throws IOException, JRException {
         response.setContentType("application/pdf");
         OutputStream out = response.getOutputStream();
         //Generating report using List<JasperPrint>
