@@ -15,7 +15,6 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 
@@ -328,9 +327,7 @@ public class ReportService implements IReportService {
 
     private JasperPrint generateOrderCoverJasperPrint() {
         try {
-            System.out.println(".... generateOrderCoverJasperPrint ....");
             JasperReport jasperReport = JasperCompileManager.compileReport(resourceLoader.getResource("classpath:templates/rpt_order_cover.jrxml").getInputStream());
-            System.out.println("...reading file OK");
             JRBeanCollectionDataSource jrBeanCollectionDataSource = new JRBeanCollectionDataSource(null,false);
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("Today", new Date());
