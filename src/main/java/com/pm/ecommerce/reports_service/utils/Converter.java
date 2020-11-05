@@ -66,7 +66,7 @@ public class Converter {
         ScheduledDeliveryDTO orderDTO = new ScheduledDeliveryDTO();
         if (order != null) {
             orderDTO.setOrder_id(order.getId());
-            orderDTO.setUser_id(order.getUser().getId());
+            orderDTO.setUser_id(order.getVendor().getId());
             orderDTO.setShipping_address(order.getAddress());
             orderDTO.setStatus(order.getStatus());
             orderDTO.setDelivery_date(order.getDeliveryDate().toLocalDateTime());

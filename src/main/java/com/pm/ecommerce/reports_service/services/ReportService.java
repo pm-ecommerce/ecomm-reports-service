@@ -78,9 +78,6 @@ public class ReportService implements IReportService {
 
         if (requestParams.containsKey(ReportRequestEnum.VENDOR_ID.value())) {
             vendorId = requestParams.get(ReportRequestEnum.VENDOR_ID.value());
-            if (vendorId.equals("null")) {
-                vendorId = null;
-            }
         }
         if (requestParams.containsKey(ReportRequestEnum.MIN_COST.value())) {
             minCost = requestParams.get(ReportRequestEnum.MIN_COST.value());
@@ -99,17 +96,13 @@ public class ReportService implements IReportService {
         HashMap<String, String> requestParams = reportRequestDTO.getRequestParams();
         checkInputParams(requestParams);
         //process
-        List<ScheduledDelivery> orderList = new ArrayList<>();
-        if (vendorId == null || vendorId.equals("null")) {
-            orderList = orderRepository.findOrderByReportRequest(fromDate, toDate);
-        } else {
-            orderList = orderRepository.findOrderByReportRequest(fromDate, toDate, vendorId);
-        }
+        List<ScheduledDelivery> orderList = orderRepository.findOrderByReportRequest(fromDate, toDate, vendorId);
 
         List<ScheduledDeliveryDTO> orderDTOList = Converter.convert2(orderList);
 
+
         SummaryDTO summaryDTO = new SummaryDTO();
-        orderList = orderRepository.findOrdersByVendor(vendorId);
+        //orderList = orderRepository.findOrdersByVendor(vendorId);
         summaryDTO.setOrderTotal((long) orderList.size());
         double amount = 0.0;
         for (ScheduledDelivery o : orderList) {
@@ -160,27 +153,27 @@ public class ReportService implements IReportService {
         //process
         dtoList = new ArrayList<>();
         if (groupBy != null && groupBy.equals(ReportRequestEnum.YEAR.value())) {
-            list = orderRepository.findOrdersByReportRequestWithGroupByYear(vendorId);
+            list = orderRepository.findOrdersByReportRequestWithGroupByYear(fromDate, toDate, vendorId);
             for (Object[] objects : list) {
                 dtoList.add(new GroupByYearDTO(objects));
             }
         } else if (groupBy != null && groupBy.equals(ReportRequestEnum.MONTH.value())) {
-            list = orderRepository.findOrdersByReportRequestWithGroupByYearMonth(vendorId);
+            list = orderRepository.findOrdersByReportRequestWithGroupByYearMonth(fromDate, toDate, vendorId);
             for (Object[] objects : list) {
                 dtoList.add(new GroupByMonthDTO(objects));
             }
         } else if (groupBy != null && groupBy.equals(ReportRequestEnum.WEEK.value())) {
-            list = orderRepository.findOrdersByReportRequestWithGroupByWeek(vendorId);
+            list = orderRepository.findOrdersByReportRequestWithGroupByWeek(fromDate, toDate, vendorId);
             for (Object[] objects : list) {
                 dtoList.add(new GroupByWeekDTO(objects));
             }
         } else if (groupBy != null && groupBy.equals(ReportRequestEnum.DAY.value())) {
-            list = orderRepository.findOrdersByReportRequestWithGroupByDay(vendorId);
+            list = orderRepository.findOrdersByReportRequestWithGroupByDay(fromDate, toDate, vendorId);
             for (Object[] objects : list) {
                 dtoList.add(new GroupByDayDTO(objects));
             }
         } else {
-            list = orderRepository.findOrdersByReportRequestWithoutGroupBy(vendorId);
+            list = orderRepository.findOrdersByReportRequestWithoutGroupBy(fromDate, toDate, vendorId);
             for (Object[] objects : list) {
                 dtoList.add(new GroupDTO(objects));
             }
@@ -202,27 +195,27 @@ public class ReportService implements IReportService {
         //process
         dtoList = new ArrayList<>();
         if (groupBy != null && groupBy.equals(ReportRequestEnum.YEAR.value())) {
-            list = vendorRepository.findVendorByReportRequestWithGroupByYear(vendorId);
+            list = vendorRepository.findVendorByReportRequestWithGroupByYear(fromDate, toDate, vendorId);
             for (Object[] objects : list) {
                 dtoList.add(new GroupByYearDTO(objects));
             }
         } else if (groupBy != null && groupBy.equals(ReportRequestEnum.MONTH.value())) {
-            list = vendorRepository.findVendorByReportRequestWithGroupByYearMonth(vendorId);
+            list = vendorRepository.findVendorByReportRequestWithGroupByYearMonth(fromDate, toDate, vendorId);
             for (Object[] objects : list) {
                 dtoList.add(new GroupByMonthDTO(objects));
             }
         } else if (groupBy != null && groupBy.equals(ReportRequestEnum.WEEK.value())) {
-            list = vendorRepository.findVendorByReportRequestWithGroupByWeek(vendorId);
+            list = vendorRepository.findVendorByReportRequestWithGroupByWeek(fromDate, toDate, vendorId);
             for (Object[] objects : list) {
                 dtoList.add(new GroupByWeekDTO(objects));
             }
         } else if (groupBy != null && groupBy.equals(ReportRequestEnum.DAY.value())) {
-            list = vendorRepository.findVendorByReportRequestWithGroupByDay(vendorId);
+            list = vendorRepository.findVendorByReportRequestWithGroupByDay(fromDate, toDate, vendorId);
             for (Object[] objects : list) {
                 dtoList.add(new GroupByDayDTO(objects));
             }
         } else {
-            list = vendorRepository.findVendorByReportRequestWithoutGroupBy(vendorId);
+            list = vendorRepository.findVendorByReportRequestWithoutGroupBy(fromDate, toDate, vendorId);
             for (Object[] objects : list) {
                 dtoList.add(new GroupDTO(objects));
             }
@@ -243,27 +236,27 @@ public class ReportService implements IReportService {
         //process
         dtoList = new ArrayList<>();
         if (groupBy != null && groupBy.equals(ReportRequestEnum.YEAR.value())) {
-            list = productRepository.findProductByReportRequestWithGroupByYear(vendorId);
+            list = productRepository.findProductByReportRequestWithGroupByYear(fromDate, toDate, vendorId);
             for (Object[] objects : list) {
                 dtoList.add(new GroupByYearDTO(objects));
             }
         } else if (groupBy != null && groupBy.equals(ReportRequestEnum.MONTH.value())) {
-            list = productRepository.findProductByReportRequestWithGroupByYearMonth(vendorId);
+            list = productRepository.findProductByReportRequestWithGroupByYearMonth(fromDate, toDate, vendorId);
             for (Object[] objects : list) {
                 dtoList.add(new GroupByMonthDTO(objects));
             }
         } else if (groupBy != null && groupBy.equals(ReportRequestEnum.DAY.value())) {
-            list = productRepository.findProductByReportRequestWithGroupByDay(vendorId);
+            list = productRepository.findProductByReportRequestWithGroupByDay(fromDate, toDate, vendorId);
             for (Object[] objects : list) {
                 dtoList.add(new GroupByDayDTO(objects));
             }
         } else if (groupBy != null && groupBy.equals(ReportRequestEnum.WEEK.value())) {
-            list = productRepository.findProductByReportRequestWithGroupByWeek(vendorId);
+            list = productRepository.findProductByReportRequestWithGroupByWeek(fromDate, toDate, vendorId);
             for (Object[] objects : list) {
                 dtoList.add(new GroupByWeekDTO(objects));
             }
         } else {
-            list = productRepository.findProductByReportRequestWithoutGroupBy(vendorId);
+            list = productRepository.findProductByReportRequestWithoutGroupBy(fromDate, toDate, vendorId);
             for (Object[] objects : list) {
                 dtoList.add(new GroupDTO(objects));
             }
@@ -284,27 +277,27 @@ public class ReportService implements IReportService {
         //process
         dtoList = new ArrayList<>();
         if (groupBy != null && groupBy.equals(ReportRequestEnum.YEAR.value())) {
-            list = categoryRepository.findCategoryByReportRequestWithGroupByYear(vendorId);
+            list = categoryRepository.findCategoryByReportRequestWithGroupByYear(fromDate, toDate, vendorId);
             for (Object[] objects : list) {
                 dtoList.add(new GroupByYearDTO(objects));
             }
         } else if (groupBy != null && groupBy.equals(ReportRequestEnum.MONTH.value())) {
-            list = categoryRepository.findCategoryByReportRequestWithGroupByYearMonth(vendorId);
+            list = categoryRepository.findCategoryByReportRequestWithGroupByYearMonth(fromDate, toDate, vendorId);
             for (Object[] objects : list) {
                 dtoList.add(new GroupByMonthDTO(objects));
             }
         } else if (groupBy != null && groupBy.equals(ReportRequestEnum.WEEK.value())) {
-            list = categoryRepository.findCategoryByReportRequestWithGroupByWeek(vendorId);
+            list = categoryRepository.findCategoryByReportRequestWithGroupByWeek(fromDate, toDate, vendorId);
             for (Object[] objects : list) {
                 dtoList.add(new GroupByWeekDTO(objects));
             }
         } else if (groupBy != null && groupBy.equals(ReportRequestEnum.DAY.value())) {
-            list = categoryRepository.findCategoryByReportRequestWithGroupByDay(vendorId);
+            list = categoryRepository.findCategoryByReportRequestWithGroupByDay(fromDate, toDate, vendorId);
             for (Object[] objects : list) {
                 dtoList.add(new GroupByDayDTO(objects));
             }
         } else {
-            list = categoryRepository.findCategoryByReportRequestWithoutGroupBy(vendorId);
+            list = categoryRepository.findCategoryByReportRequestWithoutGroupBy(fromDate, toDate, vendorId);
             for (Object[] objects : list) {
                 dtoList.add(new GroupDTO(objects));
             }
