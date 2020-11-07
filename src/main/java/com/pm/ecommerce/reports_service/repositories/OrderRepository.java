@@ -41,7 +41,7 @@ public interface OrderRepository extends JpaRepository<ScheduledDelivery,Integer
                                                 @Param("toDate") Timestamp toDate,
                                                 @Param("vendorId") String vendorId);
 
-    @Query(value="SELECT count(oi.order_id), sum(i.quantity*i.rate) " +
+    @Query(value="SELECT count(oi.scheduled_delivery_id), sum(i.quantity*i.rate) " +
             "     FROM scheduled_deliveries o, scheduled_deliveries_items oi, order_items i, vendors v " +
             "     WHERE o.id=oi.scheduled_delivery_id and oi.items_id=i.id and o.vendor_id=v.id " +
             "           and (:fromDate is null or o.delivery_date>=:fromDate) " +
